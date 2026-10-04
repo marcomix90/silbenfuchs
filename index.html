@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ff8a3d">
+<meta name="description" content="Silbenfuchs – Silben lesen lernen für Erstklässler: Silbe vorlesen, Punkte sammeln, Level aufsteigen.">
+<title>Silbenfuchs – Silben lesen lernen</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preload" href="fonts/andika-700.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ============ Startbildschirm ============ -->
+<section id="screen-start" class="screen aktiv">
+  <div class="start-inhalt">
+    <div class="logo-fuchs" aria-hidden="true">🦊</div>
+    <h1 class="logo">Silben<span>fuchs</span></h1>
+    <p class="untertitel">Lies mir die Silben vor!</p>
+
+    <div class="start-stand">
+      <span id="start-bild" class="start-bild">🥚</span>
+      <div>
+        <strong id="start-level">Level 1</strong>
+        <span id="start-titel">Silben-Ei</span>
+      </div>
+      <span class="start-punkte">⭐ <b id="start-punkte">0</b></span>
+    </div>
+
+    <button id="los-btn" class="gross-btn" type="button">Los geht's! ▶</button>
+    <p id="mikro-hinweis" class="hinweis" hidden></p>
+  </div>
+
+  <footer class="start-fuss">
+    <button id="einstellungen-btn" class="mini-btn" type="button">⚙️ Einstellungen</button>
+    <button id="install-btn" class="mini-btn" type="button" hidden>📲 App installieren</button>
+  </footer>
+</section>
+
+<!-- ============ Spiel ============ -->
+<section id="screen-spiel" class="screen">
+  <header class="leiste">
+    <button id="zurueck-btn" class="zurueck" type="button" aria-label="Zurück zum Start">←</button>
+    <div class="level-anzeige">
+      <span id="level-bild" class="level-bild">🥚</span>
+      <div class="level-info">
+        <b id="level-text">Level 1</b>
+        <div class="balken" role="progressbar" aria-label="Fortschritt bis zum nächsten Level">
+          <div id="balken-fuell" class="balken-fuell"></div>
+        </div>
+      </div>
+    </div>
+    <div id="punkte" class="punkte">⭐ <b id="punkte-zahl">0</b></div>
+  </header>
+
+  <main class="buehne">
+    <div class="fuchs-zeile">
+      <div id="fuchs" class="fuchs" aria-hidden="true">🦊</div>
+      <p id="blase" class="blase" aria-live="polite">Lies mir die Silbe vor!</p>
+    </div>
+
+    <div id="karte" class="karte">
+      <span id="silbe" class="silbe"></span>
+    </div>
+
+    <div id="tipp" class="tipp" hidden></div>
+    <p id="gehoert" class="gehoert" aria-live="polite"></p>
+  </main>
+
+  <footer class="steuerung">
+    <button id="tipp-btn" class="rund-btn" type="button" aria-label="Tipp anzeigen">💡</button>
+    <button id="anhoeren-btn" class="rund-btn" type="button" aria-label="Silbe anhören" hidden>🔊</button>
+
+    <button id="mikro-btn" class="mikro-btn" type="button" aria-label="Silbe vorlesen">
+      <span class="mikro-ring"></span><span class="mikro-ring r2"></span>🎤
+    </button>
+    <div id="eltern" class="eltern" hidden>
+      <button id="eltern-falsch" class="eltern-btn falsch" type="button">✘ Nochmal</button>
+      <button id="eltern-richtig" class="eltern-btn richtig" type="button">✔ Richtig</button>
+    </div>
+
+    <button id="weiter-btn" class="rund-btn" type="button" aria-label="Nächste Silbe">⏭</button>
+  </footer>
+</section>
+
+<!-- ============ Level geschafft ============ -->
+<div id="levelup" class="overlay" hidden>
+  <div class="levelup-karte" role="dialog" aria-labelledby="levelup-titel">
+    <div id="levelup-bild" class="levelup-bild">🐣</div>
+    <h2 id="levelup-titel">Level 2!</h2>
+    <p id="levelup-text">Du bist jetzt ein Küken!</p>
+    <p id="levelup-neu" class="levelup-neu" hidden></p>
+    <button id="levelup-btn" class="gross-btn" type="button">Weiter ▶</button>
+  </div>
+</div>
+
+<!-- ============ Einstellungen (für Eltern) ============ -->
+<dialog id="einstellungen" class="einstellungen">
+  <form method="dialog">
+    <h2>⚙️ Einstellungen</h2>
+
+    <fieldset>
+      <legend>Antwort prüfen</legend>
+      <label><input type="radio" name="eingabe" value="auto"> automatisch</label>
+      <label><input type="radio" name="eingabe" value="mikro"> 🎤 Mikrofon</label>
+      <label><input type="radio" name="eingabe" value="eltern"> 👪 Eltern bewerten</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Schrift</legend>
+      <label><input type="radio" name="schrift" value="gross"> MA</label>
+      <label><input type="radio" name="schrift" value="normal"> Ma</label>
+      <label><input type="radio" name="schrift" value="klein"> ma</label>
+      <label class="ganz"><input type="checkbox" name="vokale"> Selbstlaute rot färben</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Spracherkennung</legend>
+      <label><input type="radio" name="genauigkeit" value="locker"> großzügig</label>
+      <label><input type="radio" name="genauigkeit" value="genau"> genau</label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Silben</legend>
+      <select name="stufe" id="stufe-auswahl"></select>
+    </fieldset>
+
+    <fieldset>
+      <legend>Ton</legend>
+      <label><input type="checkbox" name="stimme"> 🗣️ Vorlesestimme</label>
+      <label><input type="checkbox" name="toene"> 🔔 Geräusche</label>
+    </fieldset>
+
+    <div class="dialog-knoepfe">
+      <button id="reset-btn" class="mini-btn gefahr" type="button">Fortschritt löschen</button>
+      <button class="gross-btn klein" value="ok">Fertig</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

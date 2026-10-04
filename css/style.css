@@ -1,0 +1,472 @@
+/* Silbenfuchs – hell, freundlich, grosse Touch-Flaechen */
+@font-face {
+  font-family: 'Andika';
+  src: url('../fonts/andika-400.woff2') format('woff2');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Andika';
+  src: url('../fonts/andika-700.woff2') format('woff2');
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  --orange: #ff8a3d;
+  --orange-dunkel: #e8672a;
+  --himmel: #fff6e9;
+  --himmel2: #ffe3c4;
+  --gras: #7ccf6a;
+  --gras-dunkel: #4fa83f;
+  --rot: #e5484d;
+  --blau: #4d96ff;
+  --tinte: #3b2a20;
+  --sanft: #8a7464;
+  --karte: #ffffff;
+  --schatten: 0 6px 0 rgba(120, 70, 30, 0.18), 0 12px 30px rgba(120, 70, 30, 0.15);
+  --rund: 28px;
+  font-family: 'Andika', 'Comic Sans MS', system-ui, sans-serif;
+  color: var(--tinte);
+  -webkit-tap-highlight-color: transparent;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; margin: 0; }
+
+body {
+  background:
+    radial-gradient(circle at 15% 10%, #fff 0 60px, transparent 61px),
+    radial-gradient(circle at 85% 18%, #fff 0 40px, transparent 41px),
+    linear-gradient(180deg, var(--himmel) 0%, var(--himmel2) 100%);
+  background-attachment: fixed;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border: none;
+  touch-action: manipulation;
+}
+button:focus-visible { outline: 4px solid var(--blau); outline-offset: 3px; }
+[hidden] { display: none !important; }
+
+/* ---------- Screens ---------- */
+.screen {
+  display: none;
+  height: 100dvh;
+  flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+.screen.aktiv { display: flex; }
+
+/* ---------- Start ---------- */
+.start-inhalt {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px;
+  text-align: center;
+}
+.logo-fuchs {
+  font-size: clamp(90px, 22vw, 150px);
+  line-height: 1;
+  animation: wippen 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 8px 0 rgba(120, 70, 30, 0.15));
+}
+.logo {
+  margin: 0;
+  font-size: clamp(44px, 11vw, 72px);
+  letter-spacing: 0.5px;
+  color: var(--orange-dunkel);
+  text-shadow: 0 4px 0 #fff;
+}
+.logo span { color: var(--tinte); }
+.untertitel { margin: -6px 0 6px; font-size: 22px; color: var(--sanft); }
+
+.start-stand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--karte);
+  border-radius: 22px;
+  padding: 12px 20px;
+  box-shadow: var(--schatten);
+  text-align: left;
+  font-size: 18px;
+}
+.start-stand strong { display: block; font-size: 22px; }
+.start-bild { font-size: 44px; }
+.start-punkte { margin-left: 10px; font-size: 22px; white-space: nowrap; }
+
+.gross-btn {
+  background: var(--gras);
+  color: #fff;
+  font-size: 30px;
+  font-weight: 700;
+  padding: 16px 44px;
+  border-radius: 999px;
+  box-shadow: 0 6px 0 var(--gras-dunkel), 0 12px 24px rgba(79, 168, 63, 0.35);
+  transition: transform 0.1s, box-shadow 0.1s;
+  margin-top: 8px;
+}
+.gross-btn:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--gras-dunkel); }
+.gross-btn.klein { font-size: 20px; padding: 10px 28px; margin: 0; }
+
+.hinweis {
+  max-width: 420px;
+  background: #fff3cd;
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-size: 15px;
+  color: #7a5b00;
+}
+
+.start-fuss {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 16px 18px;
+  flex-wrap: wrap;
+}
+.mini-btn {
+  background: rgba(255, 255, 255, 0.85);
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 15px;
+  box-shadow: 0 3px 0 rgba(120, 70, 30, 0.15);
+}
+.mini-btn.gefahr { color: var(--rot); }
+
+/* ---------- Kopfleiste im Spiel ---------- */
+.leiste {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+}
+.zurueck {
+  width: 46px; height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  font-size: 24px;
+  flex-shrink: 0;
+  box-shadow: 0 3px 0 rgba(120, 70, 30, 0.15);
+}
+.level-anzeige {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.level-bild { font-size: 36px; }
+.level-info { flex: 1; max-width: 260px; }
+.level-info b { font-size: 18px; }
+.balken {
+  height: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  overflow: hidden;
+  margin-top: 3px;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--himmel2);
+}
+.balken-fuell {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ffd93d, var(--orange));
+  transition: width 0.8s cubic-bezier(.3, 1.4, .5, 1);
+}
+.punkte {
+  background: var(--karte);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 22px;
+  box-shadow: 0 3px 0 rgba(120, 70, 30, 0.15);
+  white-space: nowrap;
+}
+.punkte.pop { animation: pop 0.4s ease; }
+
+/* ---------- Buehne ---------- */
+.buehne {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 8px 16px;
+  min-height: 0;
+}
+
+.fuchs-zeile {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  width: min(100%, 560px);
+}
+.fuchs { font-size: 64px; line-height: 1; transform-origin: bottom center; }
+.fuchs.huepf { animation: huepf 0.7s ease 2; }
+.fuchs.gruebel { animation: gruebel 0.8s ease; }
+
+.blase {
+  position: relative;
+  flex: 1;
+  margin: 0 0 22px;
+  background: var(--karte);
+  border-radius: 20px;
+  padding: 12px 16px;
+  font-size: 20px;
+  line-height: 1.3;
+  box-shadow: var(--schatten);
+}
+.blase::before {
+  content: '';
+  position: absolute;
+  left: -10px; bottom: 14px;
+  border: 10px solid transparent;
+  border-right-color: var(--karte);
+  border-left: 0;
+}
+.blase.neu { animation: blase-rein 0.3s ease; }
+
+.karte {
+  position: relative;
+  min-width: min(80vw, 300px);
+  padding: clamp(18px, 4vh, 40px) clamp(30px, 8vw, 70px);
+  background: var(--karte);
+  border-radius: var(--rund);
+  box-shadow: var(--schatten);
+  text-align: center;
+  border: 5px solid transparent;
+  transition: border-color 0.2s;
+}
+.silbe {
+  display: block;
+  font-size: clamp(64px, min(24vw, 17vh), 170px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 2px;
+}
+.vokal { color: var(--rot); }
+.karte.rein { animation: karte-rein 0.5s cubic-bezier(.3, 1.6, .5, 1); }
+.karte.hoert { border-color: var(--blau); animation: lauschen 1.2s ease-in-out infinite; }
+.karte.jubel { border-color: var(--gras); animation: jubel 0.7s ease; }
+.karte.wackel { animation: wackel 0.5s ease; }
+.karte.geloest { border-color: #ffd93d; }
+
+.plus {
+  position: absolute;
+  top: -10px; right: -6px;
+  background: #ffd93d;
+  color: var(--tinte);
+  font-weight: 700;
+  font-size: 26px;
+  padding: 4px 14px;
+  border-radius: 999px;
+  box-shadow: 0 3px 0 rgba(0, 0, 0, 0.12);
+  animation: plus 1.4s ease forwards;
+}
+
+/* ---------- Tipp ---------- */
+.tipp {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.laut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: var(--karte);
+  border-radius: 18px;
+  padding: 8px 14px 6px;
+  box-shadow: 0 4px 0 rgba(120, 70, 30, 0.15);
+  animation: laut-rein 0.45s cubic-bezier(.3, 1.6, .5, 1) both;
+  animation-delay: calc(var(--i) * 0.35s);
+}
+.laut-bild { font-size: 38px; line-height: 1.1; }
+.laut-text { font-size: 34px; font-weight: 700; }
+.laut.vokal .laut-text { color: var(--rot); }
+.laut-wort { font-size: 14px; color: var(--sanft); }
+.laut-plus { font-size: 26px; color: var(--sanft); }
+
+.gehoert { margin: 0; min-height: 1.3em; color: var(--sanft); font-size: 16px; text-align: center; }
+
+/* ---------- Steuerung ---------- */
+.steuerung {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 6vw, 40px);
+  padding: 10px 16px 22px;
+}
+.rund-btn {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: var(--karte);
+  font-size: 30px;
+  box-shadow: 0 5px 0 rgba(120, 70, 30, 0.18);
+  transition: transform 0.1s;
+}
+.rund-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 rgba(120, 70, 30, 0.18); }
+.rund-btn.leuchtet { background: #ffd93d; animation: pulsieren 1.2s ease-in-out infinite; }
+
+.mikro-btn {
+  position: relative;
+  width: 112px; height: 112px;
+  border-radius: 50%;
+  background: var(--orange);
+  font-size: 52px;
+  box-shadow: 0 7px 0 var(--orange-dunkel), 0 14px 28px rgba(232, 103, 42, 0.4);
+  transition: transform 0.1s, background 0.2s;
+}
+.mikro-btn:active { transform: translateY(5px); box-shadow: 0 2px 0 var(--orange-dunkel); }
+.mikro-btn.hoert { background: var(--blau); box-shadow: 0 7px 0 #2f6fd0, 0 14px 28px rgba(77, 150, 255, 0.45); }
+.mikro-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 4px solid var(--blau);
+  opacity: 0;
+  pointer-events: none;
+}
+.mikro-btn.hoert .mikro-ring { animation: ring 1.4s ease-out infinite; }
+.mikro-btn.hoert .mikro-ring.r2 { animation-delay: 0.7s; }
+
+.eltern { display: flex; gap: 14px; }
+.eltern-btn {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  padding: 18px 22px;
+  border-radius: 22px;
+  white-space: nowrap;
+}
+.eltern-btn.richtig { background: var(--gras); box-shadow: 0 6px 0 var(--gras-dunkel); }
+.eltern-btn.falsch { background: #f08a8d; box-shadow: 0 6px 0 #c95a5e; }
+.eltern-btn:active { transform: translateY(4px); box-shadow: none; }
+
+/* ---------- Level geschafft ---------- */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  background: rgba(59, 42, 32, 0.45);
+  padding: 20px;
+  animation: einblenden 0.3s ease;
+}
+.levelup-karte {
+  background: var(--karte);
+  border-radius: 32px;
+  padding: 26px 30px 30px;
+  text-align: center;
+  max-width: 420px;
+  box-shadow: var(--schatten);
+  animation: karte-rein 0.6s cubic-bezier(.3, 1.6, .5, 1);
+}
+.levelup-bild { font-size: 110px; line-height: 1.1; animation: wippen 1.6s ease-in-out infinite; }
+.levelup-karte h2 { margin: 6px 0 0; font-size: 44px; color: var(--orange-dunkel); }
+.levelup-karte p { font-size: 22px; margin: 8px 0; }
+.levelup-neu { background: var(--himmel); border-radius: 14px; padding: 8px 12px; font-size: 18px !important; }
+
+/* ---------- Einstellungen ---------- */
+.einstellungen {
+  border: none;
+  border-radius: 24px;
+  padding: 20px 22px;
+  width: min(92vw, 460px);
+  max-height: 90dvh;
+  color: var(--tinte);
+  box-shadow: var(--schatten);
+}
+.einstellungen::backdrop { background: rgba(59, 42, 32, 0.45); }
+.einstellungen h2 { margin: 0 0 10px; }
+.einstellungen fieldset {
+  border: 2px solid var(--himmel2);
+  border-radius: 14px;
+  margin: 0 0 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 17px;
+}
+.einstellungen legend { font-weight: 700; padding: 0 6px; }
+.einstellungen label { display: flex; align-items: center; gap: 6px; user-select: none; }
+.einstellungen label.ganz { flex-basis: 100%; }
+.einstellungen input { width: 20px; height: 20px; accent-color: var(--orange); }
+.einstellungen select { font: inherit; width: 100%; padding: 6px; border-radius: 10px; }
+.dialog-knoepfe { display: flex; justify-content: space-between; align-items: center; margin-top: 12px; }
+
+/* ---------- Effekte ---------- */
+.effekt-ebene { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 30; }
+.effekt-emoji {
+  position: fixed;
+  z-index: 31;
+  pointer-events: none;
+  line-height: 1;
+  will-change: transform;
+}
+
+/* ---------- Animationen ---------- */
+@keyframes wippen { 0%, 100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-10px) rotate(3deg); } }
+@keyframes huepf {
+  0%, 100% { transform: translateY(0) scale(1); }
+  30% { transform: translateY(-34px) scale(1.1, 0.95) rotate(-8deg); }
+  60% { transform: translateY(0) scale(1.15, 0.85); }
+}
+@keyframes gruebel { 0%, 100% { transform: rotate(0); } 30% { transform: rotate(-14deg); } 70% { transform: rotate(10deg); } }
+@keyframes blase-rein { from { transform: scale(0.9); opacity: 0.4; } to { transform: scale(1); opacity: 1; } }
+@keyframes karte-rein { from { transform: scale(0.4) rotate(-6deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+@keyframes lauschen { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+@keyframes jubel {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.18) rotate(-4deg); }
+  55% { transform: scale(0.95) rotate(3deg); }
+  80% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+@keyframes wackel {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-14px); } 40% { transform: translateX(12px); }
+  60% { transform: translateX(-8px); } 80% { transform: translateX(5px); }
+}
+@keyframes plus {
+  0% { transform: translateY(10px) scale(0.5); opacity: 0; }
+  20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: translateY(-60px) scale(1); opacity: 0; }
+}
+@keyframes laut-rein { from { transform: translateY(20px) scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes ring { from { transform: scale(1); opacity: 0.8; } to { transform: scale(1.7); opacity: 0; } }
+@keyframes pulsieren { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.12); } }
+@keyframes pop { 50% { transform: scale(1.3); } }
+@keyframes einblenden { from { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
+
+/* niedrige Bildschirme (Handy quer) */
+@media (max-height: 560px) {
+  .fuchs { font-size: 44px; }
+  .blase { font-size: 17px; padding: 8px 12px; }
+  .mikro-btn { width: 88px; height: 88px; font-size: 40px; }
+  .buehne { gap: 8px; }
+  .laut-bild { font-size: 28px; }
+  .laut-text { font-size: 26px; }
+}
