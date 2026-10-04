@@ -6,7 +6,8 @@ const verfuegbar = 'speechSynthesis' in window;
 
 function waehleStimme() {
   const alle = speechSynthesis.getVoices().filter(v => v.lang?.toLowerCase().startsWith('de'));
-  stimme = alle.find(v => /google/i.test(v.name)) || alle.find(v => v.localService) || alle[0] || null;
+  const deDE = alle.filter(v => v.lang.replace('_', '-').toLowerCase() === 'de-de');
+  stimme = deDE.find(v => /google/i.test(v.name)) || deDE.find(v => v.localService) || deDE[0] || alle[0] || null;
 }
 
 if (verfuegbar) {

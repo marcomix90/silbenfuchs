@@ -136,9 +136,11 @@ function eingabeAnzeigen() {
     + 'Ein Erwachsener kann stattdessen auf ✔ oder ✘ tippen.';
 }
 
-function hoert(an) {
-  el.mikroBtn.classList.toggle('hoert', an);
-  el.karte.classList.toggle('hoert', an);
+/** Mikro-Zustand: 'wartet' (startet noch), 'hoert' (nimmt auf) oder aus. */
+function hoert(zustand) {
+  el.mikroBtn.classList.toggle('wartet', zustand === 'wartet');
+  el.mikroBtn.classList.toggle('hoert', zustand === 'hoert');
+  el.karte.classList.toggle('hoert', zustand === 'hoert');
 }
 
 async function zuhoeren() {
@@ -150,21 +152,28 @@ async function zuhoeren() {
   }
   stumm();
   el.gehoert.textContent = '';
-  hoert(true);
-  blase('Ich höre zu … 👂');
+  hoert('wartet');
+  blase('Moment … ⏳');
   const locker = e().genauigkeit === 'locker';
   const silbe = runde.silbe;
   mikro.start({
+    onBereit: () => {
+      hoert('hoert');
+      blase('Jetzt! Ich höre zu … 👂');
+    },
     onZwischen: (alt) => passt(silbe, alt, locker),
     onFertig: (alt) => {
       hoert(false);
       if (runde?.silbe !== silbe) return;
       if (!alt.length) {
-        blase('Ich habe nichts gehört. Drück aufs Mikro und lies laut vor!');
+        runde.nichtsGehoert++;
+        blase(runde.nichtsGehoert >= 2
+          ? `Ich habe nichts gehört. Tipp: Sag die Silbe zweimal hintereinander, z. B. „${schreib(silbe)} – ${schreib(silbe)}“.`
+          : 'Ich habe nichts gehört. Warte auf „Jetzt!“ und lies dann laut vor.');
         return;
       }
       if (passt(silbe, alt, locker)) richtig();
-      else falsch(alt[0]);
+      else falsch(alt[alt.length - 1]);
     },
     onFehler: (code) => {
       hoert(false);
@@ -211,7 +220,7 @@ function silbeZeigen() {
 function neueRunde() {
   mikro.abbrechen();
   hoert(false);
-  runde = { silbe: waehleSilbe(), fehler: 0, tipp: false, geloest: false, fertig: false };
+  runde = { silbe: waehleSilbe(), fehler: 0, nichtsGehoert: 0, tipp: false, geloest: false, fertig: false };
   silbeZeigen();
   el.karte.className = 'karte';
   void el.karte.offsetWidth;

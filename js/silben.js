@@ -97,10 +97,10 @@ export function zerlege(silbe) {
   return teile;
 }
 
-/** Schreibweise fuer die Sprachausgabe, damit "me" nicht wie "Mäh" klingt. */
+/**
+ * Schreibweise fuer die Sprachausgabe. Bewusst fast unveraendert: Zusaetze wie
+ * "lie" oder "nuh" liest die Stimme als englisches "lie" bzw. buchstabiert das H.
+ */
 export function fuerStimme(silbe) {
-  let s = silbe.replace(/^sp/, 'schp').replace(/^st/, 'scht');
-  if (/[aeou]$/.test(s) && !/(au|eu)$/.test(s)) s += 'h';
-  else if (/[^e]i$/.test(s)) s += 'e';
-  return s;
+  return silbe.replace(/^sp/, 'schp').replace(/^st/, 'scht');
 }

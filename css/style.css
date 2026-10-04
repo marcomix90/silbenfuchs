@@ -334,6 +334,7 @@ button:focus-visible { outline: 4px solid var(--blau); outline-offset: 3px; }
   transition: transform 0.1s, background 0.2s;
 }
 .mikro-btn:active { transform: translateY(5px); box-shadow: 0 2px 0 var(--orange-dunkel); }
+.mikro-btn.wartet { background: #ffd93d; box-shadow: 0 7px 0 #d9b21a; animation: pulsieren 0.8s ease-in-out infinite; }
 .mikro-btn.hoert { background: var(--blau); box-shadow: 0 7px 0 #2f6fd0, 0 14px 28px rgba(77, 150, 255, 0.45); }
 .mikro-ring {
   position: absolute;

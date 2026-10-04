@@ -87,44 +87,59 @@ export class Mikrofon {
     this.erkennung.lang = 'de-DE';
     this.erkennung.interimResults = true;
     this.erkennung.maxAlternatives = 5;
-    this.erkennung.continuous = false;
+    // continuous: sonst beendet Chrome die Aufnahme bei kurzen Silben oft zu frueh
+    this.erkennung.continuous = true;
   }
 
   /**
+   * onBereit() - das Mikrofon nimmt jetzt wirklich auf,
    * onZwischen(alternativen[]) -> true beendet vorzeitig (Treffer),
    * onFertig(alternativen[]) - leer, wenn nichts verstanden wurde,
    * onFehler(code)
    */
-  start({ onZwischen, onFertig, onFehler }) {
+  start({ onBereit, onZwischen, onFertig, onFehler, maxDauer = 6000 }) {
     if (!this.verfuegbar || this.laeuft) return;
-    let alternativen = [];
-    let erledigt = false;
-    const fertig = (liste) => {
+    // alles sammeln, was je erkannt wurde: Chrome verwirft kurze Silben gern
+    // im Endergebnis, obwohl sie im Zwischenergebnis noch auftauchten
+    const gehoert = [];
+    let erledigt = false, bereit = false, timer = null;
+    const fertig = () => {
       if (erledigt) return;
       erledigt = true;
-      onFertig?.(liste);
+      clearTimeout(timer);
+      this.stop();
+      onFertig?.(gehoert);
     };
+    const meldeBereit = () => {
+      if (bereit) return;
+      bereit = true;
+      onBereit?.();
+      timer = setTimeout(fertig, maxDauer);
+    };
+    this.erkennung.onaudiostart = meldeBereit;
+    this.erkennung.onstart = () => setTimeout(meldeBereit, 800); // falls kein audiostart kommt
     this.erkennung.onresult = (e) => {
-      const liste = [];
-      for (let i = 0; i < e.results.length; i++) {
+      let endgueltig = false;
+      for (let i = e.resultIndex; i < e.results.length; i++) {
         const r = e.results[i];
-        for (let j = 0; j < r.length; j++) liste.push(r[j].transcript);
+        for (let j = 0; j < r.length; j++) {
+          const t = r[j].transcript.trim();
+          if (t && !gehoert.includes(t)) gehoert.push(t);
+        }
+        if (r.isFinal && r[0].transcript.trim()) endgueltig = true;
       }
-      alternativen = liste;
-      const final = [...e.results].every(r => r.isFinal);
-      if (!final && onZwischen?.(liste)) {
-        fertig(liste);
-        this.stop();
-      }
+      if (gehoert.length && (onZwischen?.(gehoert) || endgueltig)) fertig();
     };
     this.erkennung.onerror = (e) => {
       if (e.error === 'no-speech' || e.error === 'aborted') return; // landet in onend
+      if (erledigt) return;
       erledigt = true;
+      clearTimeout(timer);
       onFehler?.(e.error);
     };
     this.erkennung.onend = () => {
       this.laeuft = false;
-      fertig(alternativen);
+      fertig();
     };
     try { this.erkennung.start(); this.laeuft = true; }
     catch { this.laeuft = false; onFehler?.('start-fehlgeschlagen'); }
@@ -133,8 +148,9 @@ export class Mikrofon {
   stop() { if (this.laeuft) { try { this.erkennung.stop(); } catch {} } }
   abbrechen() {
     if (!this.laeuft) return;
-    this.erkennung.onresult = this.erkennung.onend = this.erkennung.onerror = null;
+    const r = this.erkennung;
+    r.onresult = r.onend = r.onerror = r.onstart = r.onaudiostart = null;
     this.laeuft = false;
-    try { this.erkennung.abort(); } catch {}
+    try { r.abort(); } catch {}
   }
 }
