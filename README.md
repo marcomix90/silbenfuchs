@@ -6,7 +6,8 @@ Gebaut ohne Framework und ohne Build-Schritt – nur HTML, CSS und ES-Module.
 
 ## Spielablauf
 
-1. Eine Silbe erscheint (z. B. **Ma**), das Kind tippt auf 🎤 und liest vor.
+1. Eine Silbe erscheint (z. B. **Ma**), das Kind liest vor. Standardmäßig bewertet ein
+   Erwachsener mit ✔/✘; alternativ prüft die Spracherkennung (🎤, siehe Einstellungen).
 2. **Richtig** → Punkte, Sterne fliegen zum Punktestand, dazu eine zufällige kleine
    Animation (Konfetti, hüpfendes Tier oder Ballons) und ein Lob vom Fuchs.
 3. **Falsch** → der Fuchs ermutigt zum nächsten Versuch und zeigt, was er verstanden hat.
@@ -43,8 +44,10 @@ Konfetti-Regen und Ballons. Alle zwei Level kommen neue Silben dazu:
 
 ### Einstellungen (⚙️ auf dem Startbildschirm)
 
-* **Antwort prüfen:** automatisch, Mikrofon oder *Eltern bewerten* (✔/✘-Knöpfe statt
-  Mikrofon – automatisch aktiv, wenn der Browser keine Spracherkennung hat).
+* **Antwort prüfen:** *Eltern bewerten* (✔/✘-Knöpfe, Standard), Mikrofon oder
+  automatisch (Mikrofon, falls der Browser Spracherkennung kann, sonst ✔/✘).
+  Die Spracherkennung tut sich mit einzelnen Silben schwer, deshalb ist sie nicht
+  mehr voreingestellt.
 * **Schrift:** MA / Ma / ma, optional Selbstlaute immer rot.
 * **Spracherkennung:** *großzügig* akzeptiert auch „mal“ für „ma“ oder einen
   Mitlaut daneben; ein falscher Selbstlaut zählt immer als Fehler. *genau* will die

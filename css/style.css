@@ -347,7 +347,7 @@ button:focus-visible { outline: 4px solid var(--blau); outline-offset: 3px; }
 .mikro-btn.hoert .mikro-ring { animation: ring 1.4s ease-out infinite; }
 .mikro-btn.hoert .mikro-ring.r2 { animation-delay: 0.7s; }
 
-.eltern { display: flex; gap: 14px; }
+.eltern { display: flex; gap: 14px; min-width: 0; }
 .eltern-btn {
   font-size: 22px;
   font-weight: 700;
@@ -359,6 +359,16 @@ button:focus-visible { outline: 4px solid var(--blau); outline-offset: 3px; }
 .eltern-btn.richtig { background: var(--gras); box-shadow: 0 6px 0 var(--gras-dunkel); }
 .eltern-btn.falsch { background: #f08a8d; box-shadow: 0 6px 0 #c95a5e; }
 .eltern-btn:active { transform: translateY(4px); box-shadow: none; }
+
+/* Handy hochkant: Bewertungsknoepfe in eigene Zeile, Tipp/Weiter darunter an den Rand */
+@media (max-width: 600px) {
+  .steuerung { gap: 16px; padding-left: 16px; padding-right: 16px; }
+  .steuerung.eltern-modus { flex-wrap: wrap; justify-content: space-between; row-gap: 12px; padding-top: 4px; }
+  .steuerung.eltern-modus .eltern { order: -1; flex-basis: 100%; }
+  .steuerung.eltern-modus .eltern-btn { flex: 1; padding: 16px 8px; }
+  .steuerung.eltern-modus #weiter-btn { margin-left: auto; }
+  .rund-btn { width: 56px; height: 56px; font-size: 26px; }
+}
 
 /* ---------- Level geschafft ---------- */
 .overlay {
@@ -462,12 +472,18 @@ button:focus-visible { outline: 4px solid var(--blau); outline-offset: 3px; }
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
 
-/* niedrige Bildschirme (Handy quer) */
-@media (max-height: 560px) {
+/* niedrige Bildschirme (kleine Handys, Handy quer): alles kompakter */
+@media (max-height: 700px) {
   .fuchs { font-size: 44px; }
-  .blase { font-size: 17px; padding: 8px 12px; }
-  .mikro-btn { width: 88px; height: 88px; font-size: 40px; }
+  .blase { font-size: 16px; padding: 8px 12px; margin-bottom: 12px; }
   .buehne { gap: 8px; }
-  .laut-bild { font-size: 28px; }
+  .karte { padding: 12px 30px; }
+  .silbe { font-size: clamp(56px, min(24vw, 13vh), 120px); }
+  .laut { flex-direction: row; gap: 4px; padding: 4px 10px; }
+  .laut-bild { font-size: 24px; }
   .laut-text { font-size: 26px; }
+  .laut-wort { display: none; }
+  .mikro-btn { width: 88px; height: 88px; font-size: 40px; }
+  .steuerung { padding-bottom: 14px; }
+  .eltern-btn { padding-top: 13px; padding-bottom: 13px; }
 }

@@ -29,10 +29,11 @@ const zufallAus = (liste) => liste[Math.floor(Math.random() * liste.length)];
 const warte = (ms) => new Promise(r => setTimeout(r, ms));
 
 // ---------- Spielstand ----------
+const VERSION = 2;
 const STANDARD = {
-  punkte: 0, richtig: 0, serie: 0,
+  version: VERSION, punkte: 0, richtig: 0, serie: 0,
   einstellungen: {
-    eingabe: 'auto', schrift: 'normal', vokale: false, genauigkeit: 'locker',
+    eingabe: 'eltern', schrift: 'normal', vokale: false, genauigkeit: 'locker',
     stufe: 'auto', stimme: true, toene: true,
   },
 };
@@ -40,7 +41,11 @@ const STANDARD = {
 function laden() {
   try {
     const s = JSON.parse(localStorage.getItem(SPEICHER));
-    if (s) return { ...STANDARD, ...s, einstellungen: { ...STANDARD.einstellungen, ...s.einstellungen } };
+    if (s) {
+      // ab Version 2 ist der Eltern-Modus Standard, die Spracherkennung war zu unzuverlaessig
+      if ((s.version ?? 1) < 2 && s.einstellungen) s.einstellungen.eingabe = 'eltern';
+      return { ...STANDARD, ...s, version: VERSION, einstellungen: { ...STANDARD.einstellungen, ...s.einstellungen } };
+    }
   } catch {}
   return structuredClone(STANDARD);
 }
@@ -71,6 +76,7 @@ const el = {
   blase: $('blase'), fuchs: $('fuchs'), punkte: $('punkte'), punkteZahl: $('punkte-zahl'),
   mikroBtn: $('mikro-btn'), eltern: $('eltern'), tippBtn: $('tipp-btn'),
   anhoerenBtn: $('anhoeren-btn'), weiterBtn: $('weiter-btn'),
+  steuerung: document.querySelector('.steuerung'),
 };
 
 function zeigeScreen(name) {
@@ -130,8 +136,9 @@ function eingabeAnzeigen() {
   const mitMikro = nimmMikro();
   el.mikroBtn.hidden = !mitMikro;
   el.eltern.hidden = mitMikro;
+  el.steuerung.classList.toggle('eltern-modus', !mitMikro);
   const hinweis = $('mikro-hinweis');
-  hinweis.hidden = mikro.verfuegbar;
+  hinweis.hidden = mikro.verfuegbar || e().eingabe === 'eltern';
   hinweis.textContent = 'Dieser Browser kann keine Spracheingabe (am besten Chrome oder Safari nehmen). '
     + 'Ein Erwachsener kann stattdessen auf ✔ oder ✘ tippen.';
 }
@@ -327,7 +334,7 @@ async function tippZeigen() {
   el.tipp.hidden = false;
   el.tippBtn.hidden = true;
   silbeZeigen();
-  blase('💡 Tipp: Sprich die Anfangslaute nacheinander und zieh sie zusammen!');
+  blase('💡 Tipp: Sprich die Laute nacheinander und zieh sie zusammen!');
   await sprich(`Ein Tipp! Hör auf die Anfänge: ${laute.map(l => l.wort).join(', ')}. Zieh die Laute zusammen!`);
 }
 
