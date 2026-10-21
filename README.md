@@ -39,9 +39,21 @@ während des Ziehens ignoriert.
 * Punkte: 5 pro Verbindung (2, wenn es bei dem Wort vorher einen Fehler gab),
   +5 extra für eine Runde ganz ohne Fehler.
 
-Die Wörter (rund 50, alle mit Emoji-Bild) stehen in `js/woerter.js`. Pro Runde werden
-nur Wörter mit verschiedenen ersten und zweiten Silben gewählt, damit die Zuordnung
-eindeutig ist.
+Die Wörter (rund 50, alle mit Emoji-Bild) stehen in `js/woerter.js`, eingeteilt in
+dieselben fünf Stufen wie beim Silbenlesen. Im Spiel kommen alle Wörter bis
+einschließlich der aktuellen Stufe vor (automatisch nach Level oder fest in den
+Einstellungen):
+
+| Stufe | neu dazu | Beispiele |
+|---|---|---|
+| 1 | Silben aus ein bis zwei Buchstaben | Ho-se, Au-to, O-ma, Ki-wi |
+| 2 | Silben mit drei Buchstaben, Umlaute, X | Ti-ger, Lö-we, Ta-xi |
+| 3 | Au, Ei, ie, Sch, ch | Sei-fe, Bie-ne, Mu-schel, Ku-chen |
+| 4 | geschlossene Silben, doppelte Mitlaute, ck | Son-ne, Ap-fel, So-cke |
+| 5 | zwei Mitlaute am Silbenanfang | Trom-mel, Kro-ne, Ze-bra |
+
+Pro Runde werden nur Wörter mit verschiedenen ersten und zweiten Silben gewählt,
+damit die Zuordnung eindeutig ist.
 
 ## Punkte und Level
 
@@ -80,7 +92,7 @@ Konfetti-Regen und Ballons. Im Spiel „Silben lesen“ kommen alle zwei Level n
 * **Spracherkennung:** *großzügig* akzeptiert auch „mal“ für „ma“ oder einen
   Mitlaut daneben; ein falscher Selbstlaut zählt immer als Fehler. *genau* will die
   Silbe exakt.
-* **Silben:** automatisch nach Level oder eine Stufe fest üben.
+* **Silben:** automatisch nach Level oder eine Stufe fest üben (gilt für beide Spiele).
 * Vorlesestimme und Geräusche an/aus, Fortschritt löschen.
 
 Der Spielstand liegt im `localStorage` des Geräts.

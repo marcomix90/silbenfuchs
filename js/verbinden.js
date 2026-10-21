@@ -1,5 +1,5 @@
 /** Spielmodus "Silben verbinden": erste Silbe + Bild links, zweite Silbe rechts verbinden. */
-import { WOERTER } from './woerter.js';
+import { waehleWoerter, mischen } from './woerter.js';
 import { sounds } from './sound.js';
 import { sprich } from './stimme.js';
 import { konfetti, belohnung } from './effekte.js';
@@ -17,23 +17,14 @@ const NEIN = ['Das passt nicht zusammen.', 'Hmm, das ist kein Wort.', 'Das war n
 const zufallAus = (liste) => liste[Math.floor(Math.random() * liste.length)];
 const SVG = 'http://www.w3.org/2000/svg';
 
-function mischen(liste) {
-  const a = [...liste];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 export class Verbinden {
   /**
    * schreib(text, anfang) - Schreibweise laut Einstellung,
    * punkteGeben(punkte, vonElement) -> Promise (Sterne, Level-up),
-   * blase(text), fuchs(klasse)
+   * blase(text), fuchs(klasse), stufe() - aktuelle Schwierigkeitsstufe (1-5)
    */
-  constructor({ schreib, punkteGeben, blase, fuchs }) {
-    Object.assign(this, { schreib, punkteGeben, blase, fuchs });
+  constructor({ schreib, punkteGeben, blase, fuchs, stufe }) {
+    Object.assign(this, { schreib, punkteGeben, blase, fuchs, stufe });
     this.feld = document.getElementById('feld');
     this.svg = document.getElementById('linien');
     this.links = document.getElementById('links');
@@ -67,7 +58,8 @@ export class Verbinden {
     this.runde++;
     this.abbrechen();
     this.svg.replaceChildren();   // auch Reste alter Linien sicher entfernen
-    this.woerter = this.waehleWoerter();
+    this.woerter = waehleWoerter(this.stufe(), ANZAHL, this.vorige);
+    this.vorige = this.woerter.map(w => w.wort);
     this.paare = [];         // [linkeKarte, rechteKarte] der richtigen Verbindungen
     this.fehlerRunde = 0;
     for (const w of this.woerter) w.fehler = 0;
@@ -95,18 +87,6 @@ export class Verbinden {
     this.zeichnen();
     this.fuchs();
     this.blase('Welche Silben gehören zusammen? Zieh einen Strich vom Bild zur passenden Silbe!');
-  }
-
-  /** 3 Woerter mit verschiedenen ersten und zweiten Silben, nicht aus der letzten Runde. */
-  waehleWoerter() {
-    const auswahl = [];
-    for (const w of mischen(WOERTER.filter(w => !this.vorige.includes(w.wort)))) {
-      if (auswahl.some(a => a.silben[0] === w.silben[0] || a.silben[1] === w.silben[1])) continue;
-      auswahl.push({ ...w });
-      if (auswahl.length === ANZAHL) break;
-    }
-    this.vorige = auswahl.map(w => w.wort);
-    return auswahl;
   }
 
   // ---------- Zeichnen ----------

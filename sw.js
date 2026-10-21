@@ -1,5 +1,5 @@
 /* Service Worker: App-Shell offline verfuegbar halten. */
-const CACHE = 'silbenfuchs-v6';
+const CACHE = 'silbenfuchs-v7';
 const DATEIEN = [
   './',
   'index.html',

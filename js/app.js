@@ -455,6 +455,7 @@ const verbinden = new Verbinden({
   punkteGeben,
   blase: (text) => blase(text, $('v-blase')),
   fuchs: (klasse) => fuchs(klasse, $('v-fuchs')),
+  stufe: aktuelleStufe,
 });
 
 $('verbinden-btn').addEventListener('click', () => {
