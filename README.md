@@ -25,6 +25,10 @@ Gebaut ohne Framework und ohne Build-Schritt – nur HTML, CSS und ES-Module.
 Links stehen drei Bilder mit der ersten Silbe ihres Wortes (🌹 **Ro**), rechts die
 zweiten Silben in gemischter Reihenfolge (**se**). Das Kind zieht mit dem Finger
 einen Strich von links nach rechts – oder tippt erst links, dann rechts.
+Punkte und Karten müssen nicht genau getroffen werden: Eine Berührung knapp daneben
+greift die nächste Karte, und sobald der Finger auf der anderen Seite ist, rastet die
+Linie an der Silbe der nächstgelegenen Zeile ein (blaue Linie). Weitere Finger werden
+während des Ziehens ignoriert.
 
 * Jede Verbindung wird sofort ausgewertet: **richtig** → grüne Linie, Konfetti,
   der Fuchs liest das Wort vor; **falsch** → rote Linie verschwindet wieder, die

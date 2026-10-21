@@ -399,8 +399,9 @@ button:focus-visible { outline: 4px solid var(--blau); outline-offset: 3px; }
   justify-content: space-between;
   gap: clamp(56px, 19vw, 160px);
   width: min(100%, 620px);
-  touch-action: none;   /* Ziehen soll nicht scrollen */
 }
+/* Ziehen soll nicht scrollen - auf der ganzen Buehne, weil auch knapp daneben gegriffen werden darf */
+#screen-verbinden .buehne { touch-action: none; }
 .linien { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; z-index: 2; }
 .spalte { display: flex; flex-direction: column; gap: clamp(12px, 3vh, 26px); flex: 1; min-width: 0; }
 .spalte.links { flex: 1.4; }
@@ -422,31 +423,33 @@ button:focus-visible { outline: 4px solid var(--blau); outline-offset: 3px; }
   animation: karte-rein 0.45s cubic-bezier(.3, 1.6, .5, 1) both;
   animation-delay: calc(var(--i) * 0.07s);
 }
-.wort-karte { justify-content: flex-start; padding-right: 22px; }
-.silben-karte { justify-content: center; padding-left: 22px; }
+.wort-karte { justify-content: flex-start; padding-right: 24px; }
+.silben-karte { justify-content: center; padding-left: 24px; }
 .wort-bild { font-size: clamp(30px, 8vw, 52px); line-height: 1; }
 .wort-silbe { font-size: clamp(26px, 7.5vw, 50px); font-weight: 700; white-space: nowrap; }
 .punkt {
   position: absolute;
   top: 50%;
-  width: 22px; height: 22px;
-  margin-top: -11px;
+  width: 28px; height: 28px;
+  margin-top: -14px;
   border-radius: 50%;
   background: var(--orange);
   border: 4px solid #fff;
   box-shadow: 0 0 0 2px var(--orange);
 }
-.wort-karte .punkt { right: -13px; }
-.silben-karte .punkt { left: -13px; }
+.wort-karte .punkt { right: -16px; }
+.silben-karte .punkt { left: -16px; }
 
 .wort-karte.gewaehlt, .silben-karte.gewaehlt { border-color: var(--orange); }
 .wort-karte.ueber, .silben-karte.ueber { border-color: var(--blau); background: #eef5ff; }
+.ueber .punkt { background: var(--blau); box-shadow: 0 0 0 2px var(--blau), 0 0 0 8px rgba(77, 150, 255, 0.3); }
 .wort-karte.fertig, .silben-karte.fertig { border-color: var(--gras); background: #effbea; animation: jubel 0.6s ease; }
 .fertig .punkt { background: var(--gras); box-shadow: 0 0 0 2px var(--gras); }
 .wort-karte.wackel, .silben-karte.wackel { animation: wackel 0.5s ease; border-color: #f08a8d; }
 
 .linie { stroke-width: 9; stroke-linecap: round; fill: none; }
 .linie.temp { stroke: var(--orange); opacity: 0.75; }
+.linie.temp.rastet { stroke: var(--blau); opacity: 1; }
 .linie.fest { stroke: var(--gras); }
 .linie.fest.neu { stroke-dasharray: 1; stroke-dashoffset: 1; animation: strich 0.35s ease-out forwards; }
 .linie.falsch { stroke: var(--rot); stroke-dasharray: 1; stroke-dashoffset: 1; animation: strich 0.25s ease-out forwards, verblassen 0.5s 0.4s ease-in forwards; }

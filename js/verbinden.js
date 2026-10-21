@@ -9,6 +9,7 @@ const PUNKTE_RICHTIG = 5;        // Verbindung ohne vorherigen Fehler bei diesem
 const PUNKTE_NACH_FEHLER = 2;
 const BONUS_FEHLERFREI = 5;      // alle Woerter einer Runde ohne Fehler
 const HINWEIS_NACH = 2;          // Fehler bei einem Wort, bis der Fuchs es vorliest
+const FANGRADIUS = 40;           // px: so weit daneben darf ein Finger eine Karte noch greifen
 
 const LOB = ['Super!', 'Toll!', 'Klasse!', 'Prima!', 'Genau!', 'Richtig!', 'Spitze!'];
 const NEIN = ['Das passt nicht zusammen.', 'Hmm, das ist kein Wort.', 'Das war nicht das Richtige.'];
@@ -40,10 +41,13 @@ export class Verbinden {
     this.runde = 0;          // Zaehler, damit alte Timer nach Rundenwechsel nichts mehr tun
     this.aktiv = false;
 
-    this.feld.addEventListener('pointerdown', (ev) => this.runter(ev));
-    this.feld.addEventListener('pointermove', (ev) => this.bewegen(ev));
-    this.feld.addEventListener('pointerup', (ev) => this.hoch(ev));
-    this.feld.addEventListener('pointercancel', () => this.abbrechen());
+    // auf der ganzen Buehne lauschen, damit auch Beruehrungen knapp neben dem Feld zaehlen
+    this.flaeche = this.feld.closest('.buehne');
+    this.flaeche.addEventListener('pointerdown', (ev) => this.runter(ev));
+    this.flaeche.addEventListener('pointermove', (ev) => this.bewegen(ev));
+    this.flaeche.addEventListener('pointerup', (ev) => this.hoch(ev));
+    this.flaeche.addEventListener('pointercancel', (ev) => this.abbrechenFuer(ev));
+    this.flaeche.addEventListener('lostpointercapture', (ev) => this.abbrechenFuer(ev));
     new ResizeObserver(() => this.zeichnen()).observe(this.feld);
   }
 
@@ -61,6 +65,7 @@ export class Verbinden {
   neueRunde() {
     this.runde++;
     this.abbrechen();
+    this.svg.replaceChildren();   // auch Reste alter Linien sicher entfernen
     this.woerter = this.waehleWoerter();
     this.paare = [];         // [linkeKarte, rechteKarte] der richtigen Verbindungen
     this.fehlerRunde = 0;
@@ -134,31 +139,60 @@ export class Verbinden {
     karte?.classList.add('gewaehlt');
   }
 
+  /** Freie Karten einer Seite ('links'/'rechts'); ohne Angabe alle freien. */
+  freieKarten(seite) {
+    const sel = seite ? `[data-seite="${seite}"]` : '[data-seite]';
+    return [...this.feld.querySelectorAll(sel)].filter(k => !k.classList.contains('fertig'));
+  }
+
+  /** Naechste freie Karte zum Finger, hoechstens FANGRADIUS daneben (Karte oder Punkt). */
+  karteNahe(ev, seite) {
+    let beste = null, besterAbstand = FANGRADIUS;
+    for (const k of this.freieKarten(seite)) {
+      const abstand = Math.min(abstandZuRechteck(ev, k.getBoundingClientRect()),
+        abstandZuRechteck(ev, k.querySelector('.punkt').getBoundingClientRect()));
+      if (abstand <= besterAbstand) { beste = k; besterAbstand = abstand; }
+    }
+    return beste;
+  }
+
   runter(ev) {
-    const karte = ev.target.closest('[data-seite]');
-    if (!karte || karte.classList.contains('fertig')) return;
-    ev.preventDefault();
+    if (this.ziehen) return;   // zweiter Finger oder Handballen waehrend des Ziehens
+    const gegenseite = this.auswahl && (this.auswahl.dataset.seite === 'links' ? 'rechts' : 'links');
     // zweiter Tipp auf die andere Seite verbindet (fuer Kinder, die nicht ziehen moegen)
-    if (this.auswahl && this.auswahl.dataset.seite !== karte.dataset.seite) {
-      this.pruefen(this.auswahl, karte);
+    const ziel = gegenseite && this.karteNahe(ev, gegenseite);
+    if (ziel) {
+      ev.preventDefault();
+      this.pruefen(this.auswahl, ziel);
       return;
     }
+    const karte = this.karteNahe(ev);
+    if (!karte) return;
+    ev.preventDefault();
     sounds.klick();
     this.waehle(karte);
     const start = this.punktVon(karte);
     this.ziehen = { id: ev.pointerId, start, x: ev.clientX, y: ev.clientY, bewegt: false };
+    this.tempEntfernen();
     this.temp = this.linie(start, start, 'temp');
-    this.feld.setPointerCapture(ev.pointerId);
+    try { this.flaeche.setPointerCapture(ev.pointerId); } catch {}
   }
 
   bewegen(ev) {
     const z = this.ziehen;
     if (!z || ev.pointerId !== z.id) return;
     if (Math.hypot(ev.clientX - z.x, ev.clientY - z.y) > 8) z.bewegt = true;
-    const f = this.feld.getBoundingClientRect();
-    this.temp.setAttribute('x2', ev.clientX - f.left);
-    this.temp.setAttribute('y2', ev.clientY - f.top);
-    const ziel = this.zielUnter(ev);
+    // Magnet: ist ein Ziel in Reichweite, rastet das Linienende an dessen Punkt ein
+    const ziel = this.zielFuer(ev);
+    let ende;
+    if (ziel) ende = this.punktVon(ziel);
+    else {
+      const f = this.feld.getBoundingClientRect();
+      ende = { x: ev.clientX - f.left, y: ev.clientY - f.top };
+    }
+    this.temp.setAttribute('x2', ende.x);
+    this.temp.setAttribute('y2', ende.y);
+    this.temp.classList.toggle('rastet', !!ziel);
     this.feld.querySelectorAll('.ueber').forEach(k => k !== ziel && k.classList.remove('ueber'));
     ziel?.classList.add('ueber');
   }
@@ -167,24 +201,47 @@ export class Verbinden {
     const z = this.ziehen;
     if (!z || ev.pointerId !== z.id) return;
     this.ziehen = null;
-    this.temp?.remove();
-    this.feld.querySelectorAll('.ueber').forEach(k => k.classList.remove('ueber'));
-    const ziel = this.zielUnter(ev);
+    this.tempEntfernen();
+    const ziel = this.zielFuer(ev);
     if (ziel) this.pruefen(this.auswahl, ziel);
-    else if (z.bewegt) this.waehle(null);   // ins Leere gezogen
+    else if (z.bewegt) this.waehle(null);   // auf der eigenen Seite oder ausserhalb losgelassen
     // nur getippt: Auswahl bleibt, der naechste Tipp auf die andere Seite verbindet
   }
 
-  /** Freie Karte der Gegenseite unter dem Finger. */
-  zielUnter(ev) {
-    const karte = document.elementFromPoint(ev.clientX, ev.clientY)?.closest('[data-seite]');
-    if (!karte || !this.auswahl || karte.classList.contains('fertig')) return null;
-    return karte.dataset.seite !== this.auswahl.dataset.seite ? karte : null;
+  /**
+   * Ziel beim Ziehen: Ist der Finger auf der anderen Haelfte des Feldes, gilt die freie
+   * Karte, deren Zeile am naechsten liegt - der Finger muss die Karte nicht genau treffen.
+   */
+  zielFuer(ev) {
+    if (!this.auswahl) return null;
+    const f = this.feld.getBoundingClientRect();
+    if (ev.clientY < f.top - FANGRADIUS || ev.clientY > f.bottom + FANGRADIUS) return null;
+    const vonLinks = this.auswahl.dataset.seite === 'links';
+    const mitte = f.left + f.width / 2;
+    if (vonLinks ? ev.clientX < mitte : ev.clientX > mitte) return null;
+    let beste = null, besterAbstand = Infinity;
+    for (const k of this.freieKarten(vonLinks ? 'rechts' : 'links')) {
+      const r = k.getBoundingClientRect();
+      const abstand = Math.abs(ev.clientY - (r.top + r.height / 2));
+      if (abstand < besterAbstand) { beste = k; besterAbstand = abstand; }
+    }
+    return beste;
+  }
+
+  tempEntfernen() {
+    this.svg.querySelectorAll('.temp').forEach(l => l.remove());
+    this.temp = null;
+    this.feld.querySelectorAll('.ueber').forEach(k => k.classList.remove('ueber'));
+  }
+
+  /** Abbruch durch den Browser (z. B. Wischgeste vom Rand) fuer den ziehenden Finger. */
+  abbrechenFuer(ev) {
+    if (this.ziehen && ev.pointerId === this.ziehen.id) this.abbrechen();
   }
 
   abbrechen() {
     this.ziehen = null;
-    this.temp?.remove();
+    this.tempEntfernen();
     this.waehle(null);
   }
 
@@ -256,4 +313,11 @@ export class Verbinden {
       sprich(`${text} Probier es nochmal!`);
     }
   }
+}
+
+/** Abstand eines Fingers zu einem Rechteck (0, wenn er darin liegt). */
+function abstandZuRechteck(ev, r) {
+  const dx = Math.max(r.left - ev.clientX, 0, ev.clientX - r.right);
+  const dy = Math.max(r.top - ev.clientY, 0, ev.clientY - r.bottom);
+  return Math.hypot(dx, dy);
 }
