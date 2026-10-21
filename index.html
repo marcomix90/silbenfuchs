@@ -21,7 +21,7 @@
   <div class="start-inhalt">
     <div class="logo-fuchs" aria-hidden="true">🦊</div>
     <h1 class="logo">Silben<span>fuchs</span></h1>
-    <p class="untertitel">Lies mir die Silben vor!</p>
+    <p class="untertitel">Was spielen wir heute?</p>
 
     <div class="start-stand">
       <span id="start-bild" class="start-bild">🥚</span>
@@ -32,7 +32,18 @@
       <span class="start-punkte">⭐ <b id="start-punkte">0</b></span>
     </div>
 
-    <button id="los-btn" class="gross-btn" type="button">Los geht's! ▶</button>
+    <div class="modi">
+      <button id="los-btn" class="modus-btn" type="button">
+        <span class="modus-bild" aria-hidden="true">🗣️</span>
+        <b>Silben lesen</b>
+        <span class="modus-text">Ma · lo · su</span>
+      </button>
+      <button id="verbinden-btn" class="modus-btn blau" type="button">
+        <span class="modus-bild" aria-hidden="true">🔗</span>
+        <b>Silben verbinden</b>
+        <span class="modus-text">Ro + se = 🌹</span>
+      </button>
+    </div>
     <p id="mikro-hinweis" class="hinweis" hidden></p>
   </div>
 
@@ -45,17 +56,17 @@
 <!-- ============ Spiel ============ -->
 <section id="screen-spiel" class="screen">
   <header class="leiste">
-    <button id="zurueck-btn" class="zurueck" type="button" aria-label="Zurück zum Start">←</button>
+    <button class="zurueck" type="button" aria-label="Zurück zum Start">←</button>
     <div class="level-anzeige">
-      <span id="level-bild" class="level-bild">🥚</span>
+      <span class="level-bild" data-kopf="bild">🥚</span>
       <div class="level-info">
-        <b id="level-text">Level 1</b>
+        <b data-kopf="level">Level 1</b>
         <div class="balken" role="progressbar" aria-label="Fortschritt bis zum nächsten Level">
-          <div id="balken-fuell" class="balken-fuell"></div>
+          <div class="balken-fuell" data-kopf="balken"></div>
         </div>
       </div>
     </div>
-    <div id="punkte" class="punkte">⭐ <b id="punkte-zahl">0</b></div>
+    <div class="punkte">⭐ <b data-kopf="punkte">0</b></div>
   </header>
 
   <main class="buehne">
@@ -85,6 +96,40 @@
     </div>
 
     <button id="weiter-btn" class="rund-btn" type="button" aria-label="Nächste Silbe">⏭</button>
+  </footer>
+</section>
+
+<!-- ============ Silben verbinden ============ -->
+<section id="screen-verbinden" class="screen">
+  <header class="leiste">
+    <button class="zurueck" type="button" aria-label="Zurück zum Start">←</button>
+    <div class="level-anzeige">
+      <span class="level-bild" data-kopf="bild">🥚</span>
+      <div class="level-info">
+        <b data-kopf="level">Level 1</b>
+        <div class="balken" role="progressbar" aria-label="Fortschritt bis zum nächsten Level">
+          <div class="balken-fuell" data-kopf="balken"></div>
+        </div>
+      </div>
+    </div>
+    <div class="punkte">⭐ <b data-kopf="punkte">0</b></div>
+  </header>
+
+  <main class="buehne">
+    <div class="fuchs-zeile">
+      <div id="v-fuchs" class="fuchs" aria-hidden="true">🦊</div>
+      <p id="v-blase" class="blase" aria-live="polite">Verbinde die Silben zu Wörtern!</p>
+    </div>
+
+    <div id="feld" class="feld">
+      <svg id="linien" class="linien" aria-hidden="true"></svg>
+      <div id="links" class="spalte links"></div>
+      <div id="rechts" class="spalte rechts"></div>
+    </div>
+  </main>
+
+  <footer class="steuerung v-steuerung">
+    <button id="v-weiter-btn" class="rund-btn" type="button" aria-label="Neue Wörter">⏭</button>
   </footer>
 </section>
 

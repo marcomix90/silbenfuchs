@@ -1,10 +1,13 @@
 # 🦊 Silbenfuchs – Silben lesen lernen
 
-Eine PWA (Progressive Web App) für Erstklässler: Eine Silbe erscheint groß auf dem
-Bildschirm, das Kind liest sie laut vor, die Spracherkennung prüft die Antwort.
+Eine PWA (Progressive Web App) für Erstklässler mit zwei Spielen:
+
+* **🗣️ Silben lesen** – eine Silbe erscheint groß, das Kind liest sie laut vor.
+* **🔗 Silben verbinden** – aus zwei Silben ein Wort zusammensetzen.
+
 Gebaut ohne Framework und ohne Build-Schritt – nur HTML, CSS und ES-Module.
 
-## Spielablauf
+## Silben lesen
 
 1. Eine Silbe erscheint (z. B. **Ma**), das Kind liest vor. Standardmäßig bewertet ein
    Erwachsener mit ✔/✘; alternativ prüft die Spracherkennung (🎤, siehe Einstellungen).
@@ -17,7 +20,28 @@ Gebaut ohne Framework und ohne Build-Schritt – nur HTML, CSS und ES-Module.
      Kind darf nachsprechen (oder mit ⏭ weiter).
 4. 💡 holt den Tipp jederzeit, ⏭ überspringt eine Silbe.
 
-### Punkte und Level
+## Silben verbinden
+
+Links stehen drei Bilder mit der ersten Silbe ihres Wortes (🌹 **Ro**), rechts die
+zweiten Silben in gemischter Reihenfolge (**se**). Das Kind zieht mit dem Finger
+einen Strich von links nach rechts – oder tippt erst links, dann rechts.
+
+* Jede Verbindung wird sofort ausgewertet: **richtig** → grüne Linie, Konfetti,
+  der Fuchs liest das Wort vor; **falsch** → rote Linie verschwindet wieder, die
+  Karten wackeln.
+* Nach **2 Fehlern beim selben Wort** liest der Fuchs das Wort zum Bild vor.
+* Sind alle drei verbunden, gibt es eine Belohnung und automatisch neue Wörter;
+  ⏭ holt sofort neue.
+* Punkte: 5 pro Verbindung (2, wenn es bei dem Wort vorher einen Fehler gab),
+  +5 extra für eine Runde ganz ohne Fehler.
+
+Die Wörter (rund 50, alle mit Emoji-Bild) stehen in `js/woerter.js`. Pro Runde werden
+nur Wörter mit verschiedenen ersten und zweiten Silben gewählt, damit die Zuordnung
+eindeutig ist.
+
+## Punkte und Level
+
+Beide Spiele sammeln Punkte für denselben Level-Fortschritt. Silben lesen:
 
 | Situation | Punkte |
 |---|---|
@@ -29,7 +53,7 @@ Gebaut ohne Framework und ohne Build-Schritt – nur HTML, CSS und ES-Module.
 
 Level *n* braucht 40 + 10·*n* Punkte. Jedes Level hat einen Tier-Titel
 (🥚 Silben-Ei → 🐣 Küken → 🐦 Spatz → … → 👑 Silben-König), beim Aufstieg gibt es
-Konfetti-Regen und Ballons. Alle zwei Level kommen neue Silben dazu:
+Konfetti-Regen und Ballons. Im Spiel „Silben lesen“ kommen alle zwei Level neue Silben dazu:
 
 | Stufe | ab Level | Silben |
 |---|---|---|
@@ -105,7 +129,9 @@ installierte Apps die neue Version laden.
 ```
 index.html            Start, Spiel, Level-Overlay, Einstellungsdialog
 css/style.css         Gestaltung und Animationen
-js/app.js             Spielablauf, Punkte, Level, Einstellungen
+js/app.js             Silben lesen, Punkte, Level, Einstellungen
+js/verbinden.js       Spiel „Silben verbinden“ (Ziehen/Tippen, Linien, Auswertung)
+js/woerter.js         zweisilbige Wörter mit Bild
 js/silben.js          Silben-Stufen, Anlauttabelle, Zerlegung in Laute
 js/speech.js          Spracherkennung und lautlicher Vergleich
 js/stimme.js          Vorlesestimme (speechSynthesis)

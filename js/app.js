@@ -1,9 +1,10 @@
-/** Silbenfuchs: Silbe erscheint, Kind liest vor, Spracherkennung prueft. */
+/** Silbenfuchs: Silben lesen (vorlesen + pruefen) und Silben verbinden. */
 import { STUFEN, zerlege, istVokal, fuerStimme } from './silben.js';
 import { Mikrofon, passt } from './speech.js';
 import { sounds, tonAn, entsperren } from './sound.js';
 import { sprich, stimmeAn, stumm } from './stimme.js';
 import { belohnung, sterneFliegen, konfetti, ballons } from './effekte.js';
+import { Verbinden } from './verbinden.js';
 
 const SPEICHER = 'silbenfuchs-v1';
 const TIPP_NACH = 2;        // Fehlversuche bis zum Tipp
@@ -73,10 +74,10 @@ const aktuelleStufe = () =>
 const $ = (id) => document.getElementById(id);
 const el = {
   karte: $('karte'), silbe: $('silbe'), tipp: $('tipp'), gehoert: $('gehoert'),
-  blase: $('blase'), fuchs: $('fuchs'), punkte: $('punkte'), punkteZahl: $('punkte-zahl'),
+  blase: $('blase'), fuchs: $('fuchs'),
   mikroBtn: $('mikro-btn'), eltern: $('eltern'), tippBtn: $('tipp-btn'),
   anhoerenBtn: $('anhoeren-btn'), weiterBtn: $('weiter-btn'),
-  steuerung: document.querySelector('.steuerung'),
+  steuerung: document.querySelector('#screen-spiel .steuerung'),
 };
 
 function zeigeScreen(name) {
@@ -99,26 +100,28 @@ function silbeHtml(silbe, vokaleFaerben) {
     .join('');
 }
 
-function blase(text) {
-  el.blase.textContent = text;
-  el.blase.classList.remove('neu');
-  void el.blase.offsetWidth;
-  el.blase.classList.add('neu');
+function blase(text, ziel = el.blase) {
+  ziel.textContent = text;
+  ziel.classList.remove('neu');
+  void ziel.offsetWidth;
+  ziel.classList.add('neu');
 }
 
-function fuchs(klasse) {
-  el.fuchs.classList.remove('huepf', 'gruebel');
-  void el.fuchs.offsetWidth;
-  if (klasse) el.fuchs.classList.add(klasse);
+function fuchs(klasse, ziel = el.fuchs) {
+  ziel.classList.remove('huepf', 'gruebel');
+  void ziel.offsetWidth;
+  if (klasse) ziel.classList.add(klasse);
 }
 
+/** Kopfleisten aller Spielbildschirme und den Startbildschirm aktualisieren. */
 function kopfAktualisieren() {
   const { level, fortschritt } = levelInfo(stand.punkte);
   const [bild, , name] = titel(level);
-  $('level-bild').textContent = bild;
-  $('level-text').textContent = `Level ${level}`;
-  $('balken-fuell').style.width = `${Math.round(fortschritt * 100)}%`;
-  el.punkteZahl.textContent = stand.punkte;
+  const setze = (art, f) => document.querySelectorAll(`[data-kopf="${art}"]`).forEach(f);
+  setze('bild', k => { k.textContent = bild; });
+  setze('level', k => { k.textContent = `Level ${level}`; });
+  setze('balken', k => { k.style.width = `${Math.round(fortschritt * 100)}%`; });
+  setze('punkte', k => { k.textContent = stand.punkte; });
   $('start-bild').textContent = bild;
   $('start-level').textContent = `Level ${level}`;
   $('start-titel').textContent = name;
@@ -259,9 +262,6 @@ async function richtig() {
     stand.richtig++;
     if (stand.serie % SERIE_BONUS === 0) bonus = SERIE_BONUS;
   }
-  const levelVorher = levelInfo(stand.punkte).level;
-  stand.punkte += punkte + bonus;
-  speichern();
 
   const lob = runde.geloest ? 'Gut nachgesprochen!' : zufallAus(LOB);
   sounds.richtig();
@@ -274,18 +274,33 @@ async function richtig() {
   el.gehoert.textContent = '';
   const gesprochen = sprich(lob);
 
-  await sterneFliegen(el.karte, el.punkte, Math.ceil((punkte + bonus) / 2));
-  el.punkte.classList.remove('pop');
-  void el.punkte.offsetWidth;
-  el.punkte.classList.add('pop');
-  kopfAktualisieren();
-
-  const levelNachher = levelInfo(stand.punkte).level;
-  await gesprochen;
-  if (levelNachher > levelVorher) await levelGeschafft(levelNachher, levelVorher);
-  else await warte(500);
+  const aufgestiegen = await punkteGeben(punkte + bonus, el.karte, gesprochen);
+  if (!aufgestiegen) await warte(500);
   besetzt = false;
   if (runde) neueRunde();  // null, wenn inzwischen zurueck zum Start
+}
+
+/**
+ * Punkte gutschreiben: Sterne fliegen von `von` zum Punktestand, danach ggf. Level-up
+ * (erst wenn `vorher` - z. B. das gesprochene Lob - fertig ist). true bei Level-up.
+ */
+async function punkteGeben(punkte, von, vorher = null) {
+  const levelVorher = levelInfo(stand.punkte).level;
+  stand.punkte += punkte;
+  speichern();
+  const ziel = document.querySelector('.screen.aktiv .punkte');
+  if (ziel) {
+    await sterneFliegen(von, ziel, Math.ceil(punkte / 2));
+    ziel.classList.remove('pop');
+    void ziel.offsetWidth;
+    ziel.classList.add('pop');
+  }
+  kopfAktualisieren();
+  const levelNachher = levelInfo(stand.punkte).level;
+  await vorher;
+  if (levelNachher <= levelVorher) return false;
+  await levelGeschafft(levelNachher, levelVorher);
+  return true;
 }
 
 function plusZeigen(wert) {
@@ -435,13 +450,35 @@ $('los-btn').addEventListener('click', () => {
   sprich(el.blase.textContent);
 });
 
-$('zurueck-btn').addEventListener('click', () => {
+const verbinden = new Verbinden({
+  schreib,
+  punkteGeben,
+  blase: (text) => blase(text, $('v-blase')),
+  fuchs: (klasse) => fuchs(klasse, $('v-fuchs')),
+});
+
+$('verbinden-btn').addEventListener('click', () => {
+  entsperren();
+  sounds.klick();
+  zeigeScreen('verbinden');
+  verbinden.start();
+  sprich($('v-blase').textContent);
+});
+
+$('v-weiter-btn').addEventListener('click', () => {
+  sounds.klick();
+  stumm();
+  verbinden.neueRunde();
+});
+
+document.querySelectorAll('.zurueck').forEach(b => b.addEventListener('click', () => {
   mikro.abbrechen();
+  verbinden.stop();
   stumm();
   runde = null;
   kopfAktualisieren();
   zeigeScreen('start');
-});
+}));
 
 el.mikroBtn.addEventListener('click', zuhoeren);
 $('eltern-richtig').addEventListener('click', () => { if (!besetzt) richtig(); });

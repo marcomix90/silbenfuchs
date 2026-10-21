@@ -1,5 +1,5 @@
 /* Service Worker: App-Shell offline verfuegbar halten. */
-const CACHE = 'silbenfuchs-v3';
+const CACHE = 'silbenfuchs-v4';
 const DATEIEN = [
   './',
   'index.html',
@@ -10,6 +10,8 @@ const DATEIEN = [
   'js/stimme.js',
   'js/sound.js',
   'js/effekte.js',
+  'js/verbinden.js',
+  'js/woerter.js',
   'fonts/andika-400.woff2',
   'fonts/andika-700.woff2',
   'manifest.webmanifest',
