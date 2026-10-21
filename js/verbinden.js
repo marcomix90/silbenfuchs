@@ -10,6 +10,7 @@ const PUNKTE_NACH_FEHLER = 2;
 const BONUS_FEHLERFREI = 5;      // alle Woerter einer Runde ohne Fehler
 const HINWEIS_NACH = 2;          // Fehler bei einem Wort, bis der Fuchs es vorliest
 const FANGRADIUS = 40;           // px: so weit daneben darf ein Finger eine Karte noch greifen
+const ZIELRADIUS = 24;           // px: ab hier rastet die Linie an der Zielsilbe ein
 
 const LOB = ['Super!', 'Toll!', 'Klasse!', 'Prima!', 'Genau!', 'Richtig!', 'Spitze!'];
 const NEIN = ['Das passt nicht zusammen.', 'Hmm, das ist kein Wort.', 'Das war nicht das Richtige.'];
@@ -145,9 +146,9 @@ export class Verbinden {
     return [...this.feld.querySelectorAll(sel)].filter(k => !k.classList.contains('fertig'));
   }
 
-  /** Naechste freie Karte zum Finger, hoechstens FANGRADIUS daneben (Karte oder Punkt). */
-  karteNahe(ev, seite) {
-    let beste = null, besterAbstand = FANGRADIUS;
+  /** Naechste freie Karte zum Finger, hoechstens `radius` daneben (Karte oder Punkt). */
+  karteNahe(ev, seite, radius = FANGRADIUS) {
+    let beste = null, besterAbstand = radius;
     for (const k of this.freieKarten(seite)) {
       const abstand = Math.min(abstandZuRechteck(ev, k.getBoundingClientRect()),
         abstandZuRechteck(ev, k.querySelector('.punkt').getBoundingClientRect()));
@@ -208,24 +209,10 @@ export class Verbinden {
     // nur getippt: Auswahl bleibt, der naechste Tipp auf die andere Seite verbindet
   }
 
-  /**
-   * Ziel beim Ziehen: Ist der Finger auf der anderen Haelfte des Feldes, gilt die freie
-   * Karte, deren Zeile am naechsten liegt - der Finger muss die Karte nicht genau treffen.
-   */
+  /** Ziel beim Ziehen: freie Karte der Gegenseite, sobald der Finger nah an ihr oder ihrem Punkt ist. */
   zielFuer(ev) {
     if (!this.auswahl) return null;
-    const f = this.feld.getBoundingClientRect();
-    if (ev.clientY < f.top - FANGRADIUS || ev.clientY > f.bottom + FANGRADIUS) return null;
-    const vonLinks = this.auswahl.dataset.seite === 'links';
-    const mitte = f.left + f.width / 2;
-    if (vonLinks ? ev.clientX < mitte : ev.clientX > mitte) return null;
-    let beste = null, besterAbstand = Infinity;
-    for (const k of this.freieKarten(vonLinks ? 'rechts' : 'links')) {
-      const r = k.getBoundingClientRect();
-      const abstand = Math.abs(ev.clientY - (r.top + r.height / 2));
-      if (abstand < besterAbstand) { beste = k; besterAbstand = abstand; }
-    }
-    return beste;
+    return this.karteNahe(ev, this.auswahl.dataset.seite === 'links' ? 'rechts' : 'links', ZIELRADIUS);
   }
 
   tempEntfernen() {
